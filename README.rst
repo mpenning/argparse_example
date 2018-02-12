@@ -5,9 +5,7 @@ A complex argparse example with command groups, file handles, required arguments
 
 Help for commands
 -----------------
-This is the output of the help for all commands...
-
-::
+This is the output of the help for all commands...::
     $ python script_example.py -h
     usage: script_example.py [-h] {create,append,secure,upload} ...
 
