@@ -5,7 +5,10 @@ A complex argparse example with command groups, file handles, required arguments
 
 Help for commands
 -----------------
-This is the output of the help for all commands...::
+This is the output of the help for all commands...
+
+::
+
     $ python script_example.py -h
     usage: script_example.py [-h] {create,append,secure,upload} ...
 
@@ -27,6 +30,7 @@ Help for create command
 -----------------------
 
 ::
+
     $ python script_example.py create -h
     usage: script_example.py create [-h] -f FILE [-b | -z]
 
@@ -45,6 +49,7 @@ Help for append command
 -----------------------
 
 ::
+
     $ python script_example.py append -h
     usage: script_example.py append [-h] -f FILE
 
@@ -59,6 +64,7 @@ Help for secure command
 -----------------------
 
 ::
+
     $ python script_example.py secure -h
     usage: script_example.py secure [-h] -f FILE -l {public,private}
 
@@ -75,6 +81,7 @@ Help for upload command
 -----------------------
 
 ::
+
     $ python script_example.py upload -h
     usage: script_example.py upload [-h] -f FILE
 
