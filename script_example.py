@@ -1,3 +1,6 @@
+import shlex
+import sys
+
 from argparse import ArgumentParser, FileType
 
 """
@@ -13,10 +16,17 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-def parse_args():
+def parse_args(input=""):
+    """Parse CLI arguments, or parse args from the input variable"""
+
+    ## input is useful if you don't want to parse args from the shell
+    if input!="":
+        # Example: parse_args("create -f this.txt -b")
+        sys.argv = [input]   # sys.argv[0] is always the whole list of args
+        sys.argv.extend(shlex.split(input))   # shlex adds the rest of argv
+
     parser = ArgumentParser(prog='script_example.py', 
         description='Manage a foo', add_help=True)
-
 
     ## Create a master subparser for all commands
     commands = parser.add_subparsers(help='commands', dest='command')
@@ -64,7 +74,7 @@ def parse_args():
     return parser.parse_args()
 
 if __name__=='__main__':
-    args = parse_args()
+    args = parse_args() # If parse_args() has no input string, then parse CLI
     fh = args.file      # Python file handle
     print args.command  # Prints the name of the command used
 
