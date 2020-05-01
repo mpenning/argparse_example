@@ -1,5 +1,6 @@
 import shlex
 import sys
+import os
 
 from argparse import ArgumentParser, FileType
 
@@ -25,8 +26,8 @@ def parse_args(input=""):
         sys.argv = [input]   # sys.argv[0] is always the whole list of args
         sys.argv.extend(shlex.split(input))   # shlex adds the rest of argv
 
-    parser = ArgumentParser(prog='script_example.py', 
-        description='Manage a foo', add_help=True)
+    parser = ArgumentParser(prog=os.path.basename(__file__), 
+        description='Help string placeholder', add_help=True)
 
     ## Create a master subparser for all commands
     commands = parser.add_subparsers(help='commands', dest='command')
