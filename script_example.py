@@ -17,14 +17,14 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-def parse_args(input=""):
-    """Parse CLI arguments, or parse args from the input variable"""
+def parse_args(input_str=""):
+    """Parse CLI arguments, or parse args from the input_str variable"""
 
-    ## input is useful if you don't want to parse args from the shell
-    if input!="":
+    ## input_str is useful if you don't want to parse args from the shell
+    if input_str!="":
         # Example: parse_args("create -f this.txt -b")
-        sys.argv = [input]   # sys.argv[0] is always the whole list of args
-        sys.argv.extend(shlex.split(input))   # shlex adds the rest of argv
+        sys.argv = [input_str]   # sys.argv[0] is always the whole list of args
+        sys.argv.extend(shlex.split(input_str))   # shlex adds the rest of argv
 
     parser = ArgumentParser(prog=os.path.basename(__file__), 
         description='Help string placeholder', add_help=True)
