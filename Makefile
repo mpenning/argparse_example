@@ -1,14 +1,14 @@
 .DEFAULT_GOAL := repo-push
 
-# Ref -> https://stackoverflow.com/a/26737258/667301
-# Ref -> https://packaging.python.org/en/latest/guides/making-a-pypi-friendly-readme/
 .PHONY: repo-push
 repo-push:
-	@echo ">> checkout master branch, push to origin/master, switch back to develop"
+	@echo ">> checkout the main branch, push to origin/main, switch back to the develop branch"
 	ping -q -c1 -W1 4.2.2.2                   # quiet ping...
 	-git checkout master || git checkout main # Add dash to ignore checkout fails
-	THIS_BRANCH=$(shell git branch --show-current)  # ENV var assignment, no space
-	git merge @{-1}                           # merge the previous branch...
-	git push origin $(THIS_BRANCH)            # push to origin / $THIS_BRANCH
+	# Now the main branch is checked out...
+	THIS_BRANCH=$(shell git branch --show-current)  # assign 'main' to $THIS_BRANCH
+	git merge @{-1}                           # merge the previous branch into main...
+	# force push to origin / $THIS_BRANCH
+	git push --force-with-lease origin $(THIS_BRANCH)
 	git checkout @{-1}                        # checkout the previous branch...
 
