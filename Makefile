@@ -1,9 +1,9 @@
-.DEFAULT_GOAL := git-push
+.DEFAULT_GOAL := repo-push
 
 # Ref -> https://stackoverflow.com/a/26737258/667301
 # Ref -> https://packaging.python.org/en/latest/guides/making-a-pypi-friendly-readme/
-.PHONY: git-push
-git-push:
+.PHONY: repo-push
+repo-push:
 	@echo ">> checkout master branch, push to origin/master, switch back to develop"
 	ping -q -c1 -W1 4.2.2.2                   # quiet ping...
 	-git checkout master || git checkout main # Add dash to ignore checkout fails
