@@ -8,7 +8,7 @@ from argparse import ArgumentParser, FileType
 MIT License
 https://opensource.org/licenses/MIT
 
-Copyright 2018 David Michael Pennington
+Copyright 2023 David Michael Pennington
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -33,20 +33,28 @@ def parse_args(input_str=""):
         add_help=True,
     )
 
-    ## Create a master subparser for all commands
-    commands = parser.add_subparsers(help="commands", dest="command")
+    ##########################################################################
+    ##  - 1. Create a master subparser for all commands
+    cmds_subparser = parser.add_subparsers(help="commands", dest="command")
+    ##  - 2. Build a parser for the `create` command and its required arguments...
+    cmds_create = cmds_subparser.add_parser("create", help="Create a foo")
 
-    ### Create a create command and its required and *optional* arguments...
-    create = commands.add_parser("create", help="Create a foo")
-    ## Make a required argument
-    create_required = create.add_argument_group("required")
+    ##########################################################################
+    ## Part a...
+    ##  - 3a.  Make required `create` argument group
+    create_required = cmds_create.add_argument_group("required")
+    ##  - 4a.  Add an required `create` '--file' argument...
     create_required.add_argument(
         "-f", "--file", required=True, type=FileType("w"), help="Foo file name"
-    )  # Write mode
-    ## Make mutually exclusive optional arguments
-    create_optional = create.add_argument_group("optional")
-    ## NOTE: Mutually exclusive args *must* be optional
+    )
+
+    ##########################################################################
+    ## Part b...
+    ##  - 3b.  Make mutually exclusive optional `create` arguments
+    create_optional = cmds_create.add_argument_group("optional")
+    ##         NOTE: Mutually exclusive args *must* be optional
     create_exclusive = create_optional.add_mutually_exclusive_group()
+    ##  - 4b.  Add an optional `create` '--bar' argument...
     create_exclusive.add_argument(
         "-b",
         "--bar",
@@ -64,9 +72,13 @@ def parse_args(input_str=""):
         help="baz a created foo",
     )
 
-    ### Create an append command and its arguments...
-    append = commands.add_parser("append", help="Append a foo")
-    append_required = append.add_argument_group("required arguments")
+    ##########################################################################
+    ## Part c...
+    ##  - 2. Build a parser for the `append` command and its required arguments...
+    cmds_append = commands.add_parser("append", help="Append a foo")
+    ##  - 3c.  Make required `append` arguments
+    append_required = cmds_append.add_argument_group("required arguments")
+    ##  - 4c.  Add a required `append` argument...
     append_required.add_argument(
         "-f",
         "--file",
@@ -76,9 +88,13 @@ def parse_args(input_str=""):
         required=True,
     )  # Append mode...
 
-    ### Create an secure command and its arguments...
+    ##########################################################################
+    ## - 2. Build a parser for the `secure` command and its required arguments...
     secure = commands.add_parser("secure", help="Secure a foo")
+    ## Part d...
+    ##  - 3d.  Make required `secure` arguments
     secure_required = secure.add_argument_group("required arguments")
+    ##  - 4d.  Add a required `secure` argument...
     secure_required.add_argument(
         "-f",
         "--file",
@@ -87,7 +103,7 @@ def parse_args(input_str=""):
         type=FileType("r"),
         required=True,
     )  # Read-only mode
-    ## Multiple choices for secure 'level'
+    ## Multiple choices for secure '--level'
     secure_required.add_argument(
         "-l",
         "--level",
