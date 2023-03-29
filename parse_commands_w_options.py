@@ -34,96 +34,76 @@ def parse_args(input_str=""):
     )
 
     ##########################################################################
-    ##  - 1. Create a master subparser for all commands
-    cmds_subparser = parser.add_subparsers(help="commands", dest="command")
-    ##  - 2. Build a parser for the `create` command and its required arguments...
-    cmds_create = cmds_subparser.add_parser("create", help="Create a foo")
+    ##  - 1. Make a subparser for all commands
+    cmds = parser.add_subparsers(dest="command", help="commands")
+    
+    ##########################################################################
+    ##  - 2. Make a parser for the `cook` command and its argument groups
+    cmds_cook = cmds.add_parser("cook", help="Cook something")
 
     ##########################################################################
-    ## Part a...
-    ##  - 3a.  Make required `create` argument group
-    create_required = cmds_create.add_argument_group("required")
-    ##  - 4a.  Add an required `create` '--file' argument...
-    create_required.add_argument(
-        "-f", "--file", required=True, type=FileType("w"), help="Foo file name"
+    ##  - 2a.  Make required `cook` argument group
+    cook_required_args = cmds_cook.add_argument_group("required")
+    ##  - 2b.  Add an required `cook` '--recipe-book' filepath argument...
+    cook_required_args.add_argument(
+        "-r", "--recipe-book", required=True, type=FileType("w"), help="File path to the recipe book"
     )
 
     ##########################################################################
-    ## Part b...
-    ##  - 3b.  Make mutually exclusive optional `create` arguments
-    create_optional = cmds_create.add_argument_group("optional")
+    ##  - 2c.  Make an optional `cook` argument group
+    cook_optional_args = cmds_cook.add_argument_group("optional")
     ##         NOTE: Mutually exclusive args *must* be optional
-    create_exclusive = create_optional.add_mutually_exclusive_group()
-    ##  - 4b.  Add an optional `create` '--bar' argument...
-    create_exclusive.add_argument(
-        "-b",
-        "--bar",
+    cook_exclusive_arg = cook_optional_args.add_mutually_exclusive_group()
+    ##  - 2d.  Add an optional `cook` '--in-microwave' argument...
+    cook_exclusive_arg.add_argument(
+        "-m",
+        "--in-microwave",
         action="store_true",
         default=False,
         required=False,
-        help="bar a created foo",
+        help="cook in microwave",
     )
-    create_exclusive.add_argument(
-        "-z",
-        "--baz",
+    ##  - 2e.  Add an optional `cook` '--on-stove' argument...
+    cook_exclusive_arg.add_argument(
+        "-s",
+        "--on-stove",
         action="store_true",
         default=False,
         required=False,
-        help="baz a created foo",
+        help="cook on the stove,
     )
 
-    ##########################################################################
-    ## Part c...
-    ##  - 2. Build a parser for the `append` command and its required arguments...
-    cmds_append = commands.add_parser("append", help="Append a foo")
-    ##  - 3c.  Make required `append` arguments
-    append_required = cmds_append.add_argument_group("required arguments")
-    ##  - 4c.  Add a required `append` argument...
-    append_required.add_argument(
-        "-f",
-        "--file",
-        help="Foo file name",
-        action="store",
-        type=FileType("a"),
-        required=True,
-    )  # Append mode...
 
     ##########################################################################
-    ## - 2. Build a parser for the `secure` command and its required arguments...
-    secure = commands.add_parser("secure", help="Secure a foo")
-    ## Part d...
-    ##  - 3d.  Make required `secure` arguments
-    secure_required = secure.add_argument_group("required arguments")
-    ##  - 4d.  Add a required `secure` argument...
-    secure_required.add_argument(
-        "-f",
-        "--file",
-        help="Foo file name",
+    ##  - 3. Build a parser for the `mix` command and its required arguments...
+    cmds_mix = cmds.add_parser("mix", help="Mix something")
+    ##  - 3a.  Make required `mix` arguments
+    mix_required = cmds_mix.add_argument_group("required arguments")
+    ##  - 3b.  Add a required `mix` argument...
+    mix_required.add_argument(
+        "-c",
+        "--contents",
+        help="Name of contents",
         action="store",
-        type=FileType("r"),
         required=True,
-    )  # Read-only mode
-    ## Multiple choices for secure '--level'
-    secure_required.add_argument(
-        "-l",
-        "--level",
-        help="Foo file security level",
-        action="store",
-        type=str,
-        required=True,
-        choices=["public", "private"],
     )
 
-    ## Create an upload command, and its arguments...
-    upload = commands.add_parser("upload", help="Upload a foo")
-    upload.add_argument(
-        "-f",
-        "--file",
+
+    ##########################################################################
+    ##  - 4. Build a parser for the `chop` command and its required arguments...
+    chop = cmds.add_parser("chop", help="Chop something")
+    ##  - 4a.  Make required `chop` arguments
+    chop_required = chop.add_argument_group("required arguments")
+    ##  - 4b.  Add a required `chop` argument...
+    chop_required.add_argument(
+        "-s",
+        "--size",
+        help="Chop to this size",
+        action="store",
+        type=float,
         required=True,
-        default="",
-        type=FileType("r"),
-        help="foo file name",
-    )  # Read-only mode
+    )
+
 
     return parser.parse_args()
 
@@ -132,8 +112,3 @@ if __name__ == "__main__":
     args = parse_args()  # If parse_args() has no input string, then parse CLI
     fh = args.file  # Python file handle
     print args.command  # Prints the name of the command used
-
-    try:
-        print(args.level)  # Throws an error unless the command is 'secure'
-    except AttributeError:
-        pass
