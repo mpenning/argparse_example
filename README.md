@@ -44,7 +44,10 @@ class CLIParser:
             description="Help string placeholder",
             add_help=True,
         )
-        self.subparsers = self.parser.add_subparsers(help="commands", dest="command")
+        self.subparsers = self.parser.add_subparsers(
+            required=True,
+            help="commands",
+            dest="command")
 
         self.build_command_project()
         self.build_command_task()
