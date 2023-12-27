@@ -1,116 +1,135 @@
 
-A quick example of python argparse usage...
+A quick example of python argparse usage...  this will allow you to use a command with specific options per command.
+
+It requires the python `attrs` and `loguru` packages.
 
 ```python
-
+from argparse import ArgumentParser, Namespace, FileType
+from argparse import _SubParsersAction
+from typing import List
 import shlex
 import sys
 import os
 
-from argparse import ArgumentParser, FileType
+from loguru import logger
+import attrs
 
 
-def parse_args(input_str=""):
-    """Parse CLI arguments, or parse args from the input_str variable"""
+@attrs.define(repr=False)
+class CLIParser:
+    """
+    :param input_str: String list of arguments
+    :type input_str: str
+    """
+    input_str: str = ""
 
-    ## input_str is useful if you don't want to parse args from the shell
-    if input_str != "":
-        # Example: parse_args("create -f this.txt -b")
-        sys.argv = [input_str]  # sys.argv[0] is always the whole list of args
-        sys.argv.extend(shlex.split(input_str))  # shlex adds the rest of argv
+    argv: List = None
+    parser: ArgumentParser = None
+    subparsers: _SubParsersAction = None
 
-    parser = ArgumentParser(
-        prog=os.path.basename(__file__),
-        description="Help string placeholder",
-        add_help=True,
-    )
+    @logger.catch(reraise=True)
+    def __init__(self, input_str: str = ""):
+        if input_str == "":
+            input_str = " ".join(sys.argv)
 
-    ## Create a master subparser for all commands
-    commands = parser.add_subparsers(help="commands", dest="command")
+        self.input_str = input_str
+        self.argv = [input_str]
+        self.argv.extend(shlex.split(input_str))
 
-    ### Create a create command and its required and *optional* arguments...
-    create = commands.add_parser("create", help="Create a foo")
-    ## Make a required argument
-    create_required = create.add_argument_group("required")
-    create_required.add_argument(
-        "-f", "--file", required=True, type=FileType("w"), help="Foo file name"
-    )  # Write mode
-    ## Make mutually exclusive optional arguments
-    create_optional = create.add_argument_group("optional")
-    ## NOTE: Mutually exclusive args *must* be optional
-    create_exclusive = create_optional.add_mutually_exclusive_group()
-    create_exclusive.add_argument(
-        "-b",
-        "--bar",
-        action="store_true",
-        default=False,
-        required=False,
-        help="bar a created foo",
-    )
-    create_exclusive.add_argument(
-        "-z",
-        "--baz",
-        action="store_true",
-        default=False,
-        required=False,
-        help="baz a created foo",
-    )
+        self.parser = None
+        self.subparsers = None
 
-    ### Create an append command and its arguments...
-    append = commands.add_parser("append", help="Append a foo")
-    append_required = append.add_argument_group("required arguments")
-    append_required.add_argument(
-        "-f",
-        "--file",
-        help="Foo file name",
-        action="store",
-        type=FileType("a"),
-        required=True,
-    )  # Append mode...
+        self.parser = ArgumentParser(
+            prog=os.path.basename(__file__),
+            description="Help string placeholder",
+            add_help=True,
+        )
+        self.subparsers = self.parser.add_subparsers(help="commands", dest="command")
 
-    ### Create an secure command and its arguments...
-    secure = commands.add_parser("secure", help="Secure a foo")
-    secure_required = secure.add_argument_group("required arguments")
-    secure_required.add_argument(
-        "-f",
-        "--file",
-        help="Foo file name",
-        action="store",
-        type=FileType("r"),
-        required=True,
-    )  # Read-only mode
-    ## Multiple choices for secure 'level'
-    secure_required.add_argument(
-        "-l",
-        "--level",
-        help="Foo file security level",
-        action="store",
-        type=str,
-        required=True,
-        choices=["public", "private"],
-    )
+        self.build_command_project()
+        self.build_command_task()
 
-    ## Create an upload command, and its arguments...
-    upload = commands.add_parser("upload", help="Upload a foo")
-    upload.add_argument(
-        "-f",
-        "--file",
-        required=True,
-        default="",
-        type=FileType("r"),
-        help="foo file name",
-    )  # Read-only mode
+    def __repr__(self) -> str:
+        return f"""<Parser '{" ".join(self.argv)}'>"""
 
-    return parser.parse_args()
+    @logger.catch(reraise=True)
+    def parse(self) -> Namespace:
+        return self.parser.parse_args()
+
+    @logger.catch(reraise=True)
+    def build_command_project(self) -> None:
+        """Build the project command as a subparser"""
+        parser = self.subparsers.add_parser(
+            "project",
+            help="Create a new project")
+
+        parser_required = parser.add_argument_group("required")
+        parser_required.add_argument(
+            "-p", "--project",
+            required=True,
+            type=str,
+            help="Create a new project with this name")
+
+        parser_optional = parser.add_argument_group("optional")
+        parser_optional.add_argument(
+            "-e", "--send_email",
+            required=False,
+            action='store_true',
+            help="Send an email about the new project event")
+
+        parser_optional_exclusive = parser_optional.add_mutually_exclusive_group()
+        parser_optional_exclusive.add_argument(
+            "-c", "--create",
+            required=False,
+            action='store_true',
+            help="Create this new task")
+        parser_optional_exclusive.add_argument(
+            "-s", "--show",
+            required=False,
+            action='store_true',
+            help="Show this new task")
+
+    @logger.catch(reraise=True)
+    def build_command_task(self) -> None:
+        """Build the task command as a subparser"""
+        parser = self.subparsers.add_parser(
+            "task",
+            help="Manage a task")
+
+        parser_required = parser.add_argument_group("required")
+        parser_required.add_argument(
+            "-t", "--task",
+            required=True,
+            type=str,
+            help="Task name")
+
+        parser_optional = parser.add_argument_group("optional")
+        parser_optional.add_argument(
+            "-e", "--send_email",
+            required=False,
+            action='store_true',
+            help="Send an email about the new task event")
+        parser_optional.add_argument(
+            "-o", "--owner",
+            required=False,
+            type=str,
+            help="Set task owner")
+
+        parser_optional_exclusive = parser_optional.add_mutually_exclusive_group()
+        parser_optional_exclusive.add_argument(
+            "-c", "--create",
+            required=False,
+            action='store_true',
+            help="Create this new task")
+        parser_optional_exclusive.add_argument(
+            "-s", "--show",
+            required=False,
+            action='store_true',
+            help="Show this new task")
 
 
-if __name__ == "__main__":
-    args = parse_args()  # If parse_args() has no input string, then parse CLI
-    fh = args.file  # Python file handle
-    print args.command  # Prints the name of the command used
-
-    try:
-        print(args.level)  # Throws an error unless the command is 'secure'
-    except AttributeError:
-        pass
+if __name__=="__main__":
+    parser = CLIParser()
+    args = parser.parse()
+    print(args)
 ```
